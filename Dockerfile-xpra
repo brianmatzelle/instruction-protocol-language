@@ -1,0 +1,15 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV USER=root
+
+
+RUN apt-get update && apt-get install -y \
+    xpra xvfb x11-xserver-utils \
+    xterm curl lxde \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    apt-get update && apt-get install -y chromium-browser
+
+EXPOSE 14500
+
+CMD ["xpra", "start", "--bind-tcp=0.0.0.0:14500", "--html=on", "--start=xterm", "--daemon=no"]

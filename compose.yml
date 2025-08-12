@@ -1,0 +1,10 @@
+services:
+  vnc-container:
+    build: .
+    ports:
+      - "5901:5901"  # <- VNC port exposed to host
+    environment:
+      - DISPLAY=:1  # <- VNC runs on display :1
+      - USER=root
+    privileged: true
+    shm_size: '4gb'
