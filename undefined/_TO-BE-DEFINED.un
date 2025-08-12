@@ -1,3 +1,37 @@
-# folder structure, when is it time to move an instruction set down into a new folder?
-# should all-capital file names signify something in particular for the defined compiler?
-# 
+# Open design questions for undefined (scoped to this directory and it's children)
+
+1. Folder structure
+  - When should an instruction set be factored into a new folder/module? What are criteria (size, cohesion, external dependencies)?
+
+2. ALL-CAPS semantics
+  - Should ALL-CAPS `.un` files denote canonical, actively evolving specs (e.g., `SPEC.un`, `WORKFLOW.un`)? How do we version them?
+
+3. Spec placement
+  - Should `SPEC.un` live here or in `project/` as well? How do we handle multi-project reuse of language rules?
+
+4. Executor
+  - Where does the runner live (CLI vs. agent)? How does it discover entry files (e.g., `plan.un`), and how does it locate cascading `_RULES.un`?
+
+5. State model
+  - What is the precise JSON schema for the program state snapshot? How do we persist/restore between runs? What fields are mandatory?
+
+6. MCP tool registry
+  - How do we enumerate available MCP tools and their capabilities? How do we rank/select tools given `#` purpose and `context:`?
+
+7. Conditionals and loops (future)
+  - How will we add minimal conditionals or bounded loops without breaking linearity? Proposed syntax and constraints?
+
+8. Security and safety
+  - What defaults for non-interactive execution, sandboxing, secret handling, and network constraints should be enforced by default?
+
+9. Testing
+  - What is the minimal test format for steps (golden returns, probes)? Can we simulate MCP calls in a dry-run mode?
+
+10. Determinism
+  - How do we record inputs and outputs to ensure runs are reproducible? How do we capture environment/version fingerprints?
+
+11. Error policy
+  - Standard taxonomy and recovery paths beyond current rules (e.g., backoff, circuit breaker, compensating actions)?
+
+12. Editor integration
+  - How should authoring assistance work (linting of `context:`, validation of markers, quick-fixes for Resolution Needed)? 

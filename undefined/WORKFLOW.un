@@ -1,0 +1,33 @@
+# undefined runtime workflow
+
+1. Read purpose
+  - Parse `#` to establish global intent and constraints.
+
+2. Initialize state (return { state: {}, priorReturn: null })
+
+3. For each function in order
+  a. Collect inputs
+    - Start from `context:` (if present)
+    - Merge with `priorReturn`
+    - Merge with accumulated state
+    - Apply inline `()` derivations
+  b. Select MCP tool(s)
+    - Based on capability and purpose; prefer non-interactive flags.
+  c. Execute
+    - Perform calls; keep them conceptually atomic; capture machine-readable results and key human signals.
+  d. Validate and return
+    - Validate critical assumptions; compute the single canonical return value.
+  e. Update state
+    - Merge new bindings into state; set `priorReturn` to current return.
+  f. Log
+    - Record marker, title, resolved context, calls, return, timing, warnings.
+  g. Handle TODO
+    - On `TODO`, stop and output snapshot { purpose, marker, priorReturn, state, notes }.
+
+4. Errors
+  - Resolution Needed: halt with details and suggested edits.
+  - Tool Failure: retry once if safe; else halt with structured error.
+  - Partial Results: return identifiers with `status: "partial"`.
+
+5. Complete
+  - Emit final return and full log.

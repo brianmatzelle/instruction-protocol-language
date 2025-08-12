@@ -1,4 +1,48 @@
-hashtag refers to a new internal, defined instruction for the protocol
-# _ prefixed file name defines an internal, meta 
-# a filename in all-capitals is mutable, and intended to be updated/rewritten as development progresses
-# _RULES.md files are cascading, each child directory should contain one and inherit the rules from it's parent directory's _RULES.md
+# undefined: runtime rules (scoped to this directory and descendants)
+
+1. Program purpose
+  - `#` defines the program’s purpose. It informs tool selection, prompts, and validations.
+
+2. Functions and ordering
+  - A function is any line starting with one of: `1.`, `2.`, ..., `a.`, `b.`, ..., `i.`, `ii.`, ..., or `-`.
+  - Execute functions top-to-bottom. Returns are piped from each function to the next.
+  - Nesting increases specificity; inner steps refine or support the parent step.
+
+3. Context
+  - `context:` under a function provides arguments/hints for MCP calls.
+  - Resolution order: (1) `context:` explicit values, (2) prior return, (3) accumulated program state, (4) inline `()` derivations. If unresolved, halt with a Resolution Needed error.
+
+4. Returns `()`
+  - Parentheses denote a return expression or inline evaluation. Each function must yield a single canonical value (prefer objects).
+
+5. Horizontal context `*{ }*`
+  - Non-binding constraints and notes. Influence defaults and safety checks, never override `context:` explicitly.
+
+6. TODO
+  - On `TODO`, stop and print a structured snapshot: purpose, marker, priorReturn, state, notes.
+
+7. Logging
+  - For each function, log: marker, title, resolved context, MCP calls (tool, args, summarized outputs), return, timing, warnings.
+
+8. Idempotency and side effects
+  - Prefer idempotent steps. When side effects occur, return explicit identifiers to enable detection and resumption.
+
+9. Errors
+  - Resolution Needed: list missing fields, expected sources, suggested edits.
+  - Tool Failure: one safe retry; otherwise halt with structured error including stdout/stderr excerpts.
+  - Partial Results: return `status: "partial"` with identifiers.
+
+10. Cascading rules
+  - `_RULES.un` files cascade: a child directory inherits parent rules; child may add rules but should not silently contradict parents. If overriding, state it explicitly in the child rules.
+
+11. Private/meta files
+  - Files beginning with `_` are private/meta and not used directly at runtime except `_RULES.un` and `WORKFLOW.un`.
+  - ALL-CAPS filenames are mutable, intended to evolve frequently.
+
+12. Spec location
+  - Canonical spec for this directory: `SPEC.un`. Execution workflow: `WORKFLOW.un`.
+
+13. Human developer comments
+  - Sometimes, a human developer may want to manually add comments, thoughts, or questions to .un files, without influencing the syntax/formatting that you've defined. These can be placed anywhere in a .un script, and will just be denoted by the contents within /**/.
+
+/* make sure to develop the compiler during execution, if a better syntax or processing method is thought of or discovered. */

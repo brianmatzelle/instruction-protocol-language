@@ -1,0 +1,21 @@
+# Project runtime rules (inherits from ../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../undefined/_RULES.un`.
+
+2. Entry point
+  - Default entry file: `plan.un` in this directory.
+
+3. Tooling defaults
+  - Prefer non-interactive flags for all MCP calls.
+  - Record stdout/stderr excerpts for logs; store machine-readable outputs in state.
+
+4. Safety
+  - Network: outbound-only; avoid secret exfiltration; redact tokens in logs.
+  - Filesystem: write only within project directory by default.
+
+5. Identifiers to return
+  - When cloning or creating repos/containers, return explicit IDs/URLs/tags to enable idempotent resume.
+
+6. TODO snapshot fields
+  - Include: `purpose`, `marker`, `priorReturn`, `state`, `notes`, `project: true`.

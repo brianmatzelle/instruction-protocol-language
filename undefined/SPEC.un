@@ -1,0 +1,76 @@
+# undefined language spec for MCP execution
+
+1. Design goals (return { readability: true, linear: true, mcpFirst: true, extensible: true })
+  - Keep programs small and linear. Avoid branching by default.
+  - Treat each function as a transformation that consumes prior return and produces the next.
+  - Optimize for MCP tool invocation and data piping.
+
+2. Core syntax (return { markers: ["1.", "a.", "i.", "-"], context: true, returns: true, hContext: true, todo: true })
+  a. Purpose line
+    - `#` states purpose; influences tool choice and validation.
+  b. Functions (vertical)
+    - Markers: `1.`, `2.`, ..., `a.`, `b.`, ..., `i.`, `ii.`, ..., `-`.
+    - Execute top-to-bottom; nested items refine parent.
+  c. `context:`
+    - Parameters/hints resolved before execution.
+    - Indented block under a function.
+  d. Returns `()`
+    - Inline evaluation and explicit return value for the function.
+  e. Horizontal context `*{ }*`
+    - Non-binding constraints used for defaults/safety.
+  f. TODO
+    - Halts with a structured snapshot.
+
+3. Execution model (return { state: true, piping: true, idempotency: preferred })
+  a. State and piping
+    - Prior return is implicit input for the next function.
+    - Accumulate state as a merged object across functions.
+  b. Parameter resolution (strict order)
+    - 1) `context:` explicit values
+    - 2) `priorReturn`
+    - 3) accumulated state
+    - 4) inline `()` derivations
+    - else: Resolution Needed error
+  c. Validation
+    - Each function encodes validation outcomes in its return (e.g., `isHealthy`).
+
+4. MCP invocation (return { selection: "capability+purpose", nonInteractive: true })
+  a. Tool selection
+    - Choose based on capabilities and program purpose.
+  b. Call construction
+    - Build args from `context:`; fill from priorReturn/state; honor non-interactive flags.
+  c. Atomicity
+    - If multiple calls are needed, return a single consolidated value.
+
+5. Logging (return { perStep: true, snapshotOnTODO: true })
+  a. Per function
+    - Log marker, title, resolved context, calls, return, timing, warnings.
+  b. TODO snapshot
+    - Log purpose, marker, priorReturn, state, notes.
+
+6. Errors (return { resolutionNeeded: true, toolFailure: true, partialResults: true })
+  a. Resolution Needed
+    - List missing fields, expected sources, suggested edits.
+  b. Tool Failure
+    - One safe retry; else halt with structured error (stdout/stderr excerpts).
+  c. Partial Results
+    - Return `status: "partial"` with persistent identifiers.
+
+7. Canonical returns (return { preferObjects: true })
+  - Prefer objects with explicit fields. Arrays acceptable for lists; include counts when helpful.
+
+8. Minimal examples
+  a. Build and verify image
+    i. `# Build and verify Xpra image`
+    ii. `1. Build Docker image (return { imageId, tag })`
+      context:
+        base: "debian:bookworm-slim"
+        dockerfilePath: "./Dockerfile-xpra"
+    iii. `2. Run and probe (return { sessionUrl, isHealthy })`
+      context:
+        image: imageId
+        ports: ["10000:10000/tcp"]
+      *{ prefer non-root; timeout 30s }*
+
+9. Versioning (return { changesLogged: true })
+  - Track changes in VCS; update this file as the language evolves.
