@@ -1,0 +1,8 @@
+id,name,role,active
+1,Ada Lovelace,Engineer,true
+2,Grace Hopper,Scientist,true
+3,Alan Turing,Researcher,false
+4,Katherine Johnson,Mathematician,true
+5,Donald Knuth,Author,true
+6,Barbara Liskov,Professor,true
+7,Edsger Dijkstra,Theorist,false

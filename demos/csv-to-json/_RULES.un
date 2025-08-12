@@ -7,5 +7,5 @@
   - Entry file: `_MAIN.un` in this directory.
 
 3. Execution policy
-  - Read CSV from `path` (if provided) or stdin; respect `limit` from `*{ }*`.
+  - Execute `python3 csv_to_json.py --path <path> --limit <limit>`.
   - Convert rows to objects using header row.
