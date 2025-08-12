@@ -1,0 +1,10 @@
+# language requirements for undefined
+
+1. Requires language (return { name: "undefined", semver: "^1.0.0", features: ["context", "returns", "hContext", "todo"] })
+
+2. Requires runner (return { name: "undefined-runner", semver: "~0.1.0" })
+
+3. Extensions (return { optIn: [] })
+
+4. Notes
+  - This project expects the runtime to implement parameter resolution order and TODO behavior per `../../undefined/SPEC.un`.

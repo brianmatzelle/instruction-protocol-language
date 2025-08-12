@@ -1,0 +1,21 @@
+# lock for undefined execution
+
+1. Spec pins (return {
+  specPath: "../../undefined/SPEC.un",
+  rulesPath: "../../undefined/_RULES.un",
+  specDigest: "sha256:TO_SET",
+  rulesDigest: "sha256:TO_SET"
+})
+
+2. Tools (return {
+  python: "(discover at runtime)",
+  docker: "(optional)",
+  mcpClients: []
+})
+
+3. Status (return {
+  lockedAt: "(set when locking)",
+  environment: "(uname -a)",
+  note: "Regenerate lock when upgrading language or tools",
+  locked: false
+})

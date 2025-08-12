@@ -42,9 +42,13 @@
 12. Spec location
   - Canonical spec for this directory: `SPEC.un`. Execution workflow: `WORKFLOW.un`.
 
-13. Human developer comments
+ 13. Language and lock requirements
+  - If a project provides `_LANGUAGE.un`, verify `name == "undefined"`, check `semver` compatibility with this compiler, validate required `features`, and enforce minimum runner version if declared.
+  - If a project provides `_LOCK.un` with `{ specPath, rulesPath, specDigest, rulesDigest }`, prefer the locked spec/rules when executing; warn if workspace copies differ. If `{ locked: true }`, require an explicit unlock or relock action to proceed with different specs.
+
+ 14. Human developer comments
   - Sometimes, a human developer may want to manually add comments, thoughts, or questions to .un files, without influencing the syntax/formatting that you've defined. These can be placed anywhere in a .un script, and will just be denoted by the contents within /**/.
 
 /* make sure to develop the compiler during execution, if a better syntax or processing method is thought of or discovered. */
 
-14. `_DEMO.un` files represent a successful execution of the script, scoped to the _DEMO.un file's location.
+ 15. `_DEMO.un` files represent a successful execution of the script, scoped to the _DEMO.un file's location.

@@ -1,0 +1,122 @@
+# Initialize a new undefined project
+
+1. Purpose (return { goal: "scaffold a runnable .un program with versioning" })
+
+2. Confirm target directory and compiler location (return { path, compilerPath, entry })
+  context:
+    path: "./YOUR_PROJECT_PATH"  /** set this to where files should be created */
+    compilerPath: "./undefined"   /** path to the compiler folder relative to project root */
+    entry: "_MAIN.un"             /** default entrypoint file name */
+
+3. Create required files (return { created })
+  a. Write `_RULES.un` (return { path: "_RULES.un" })
+    - Inherit from `(compilerPath)/_RULES.un`
+  b. Write `SPEC.un` (return { path: "SPEC.un" })
+  c. Write `WORKFLOW.un` (return { path: "WORKFLOW.un" })
+  d. Write `(entry)` (return { path: entry })
+  e. Write `_LANGUAGE.un` (return { path: "_LANGUAGE.un" })
+  f. Write `_LOCK.un` (return { path: "_LOCK.un" })
+  g. Write `_VERSION.un` (return { path: "_VERSION.un" })
+  h. Write `README.md` (return { path: "README.md" })
+
+4. Templates (return { files: templates })
+  context:
+    templates:
+      _RULES.un: |
+        # Project runtime rules (inherits from compiler rules)
+        
+        1. Inheritance
+          - Inherit all rules from `(compilerPath)/_RULES.un`.
+        
+        2. Entry point
+          - Entry file: `(entry)` in this directory.
+      
+      WORKFLOW.un: |
+        # Project workflow
+        
+        1. Read purpose
+        2. Initialize state (return { state: {}, priorReturn: null })
+        3. For each function
+          a. Resolve inputs
+          b. Execute
+          c. Validate
+          d. Return and update
+          e. Log
+          f. TODO
+        4. Completion
+      
+      SPEC.un: |
+        # Project spec
+        
+        1. Inputs (return { })
+        2. Output (return { })
+        3. Notes
+          - Define your program's contract here.
+      
+      (entry): |
+        # New undefined program
+        
+        1. Describe first step (return { example: true })
+        2. Next step (return { })
+      
+      _LANGUAGE.un: |
+        # language requirements for undefined
+        
+        1. Requires language (return { name: "undefined", semver: "^1.0.0", features: ["context", "returns", "hContext", "todo"] })
+        
+        2. Requires runner (return { name: "undefined-runner", semver: "~0.1.0" })
+        
+        3. Extensions (return { optIn: [] })
+      
+      _LOCK.un: |
+        # lock for undefined execution
+        
+        1. Spec pins (return {
+          specPath: "(compilerPath)/SPEC.un",
+          rulesPath: "(compilerPath)/_RULES.un",
+          specDigest: "sha256:TO_SET",
+          rulesDigest: "sha256:TO_SET"
+        })
+        
+        2. Tools (return {
+          python: "(discover at runtime)",
+          docker: "(optional)",
+          mcpClients: []
+        })
+        
+        3. Status (return {
+          lockedAt: "(set when locking)",
+          environment: "(uname -a)",
+          note: "Regenerate lock when upgrading language or tools",
+          locked: false
+        })
+      
+      _VERSION.un: |
+        # project version
+        
+        1. Version (return { version: "0.1.0" })
+      
+      README.md: |
+        # New undefined project
+        
+        This project is scaffolded for the `undefined` language.
+        
+        Files:
+        - `_RULES.un`: inherits core runtime rules from `(compilerPath)`
+        - `SPEC.un`: contract for inputs/outputs
+        - `WORKFLOW.un`: how to run steps
+        - `(entry)`: entry point program
+        - `_LANGUAGE.un`: language/runner requirements
+        - `_LOCK.un`: pinned spec/tools (update via lock process)
+        - `_VERSION.un`: project version (optional)
+
+5. Materialize templates (return { written })
+  - Use a shell to create the directory and write files with the above templates.
+  - Commands are illustrative; adapt paths as needed:
+  - For each template key `name` and content `body`:
+    - `mkdir -p (path)`
+    - `cat > (path)/(name) <<'EOF'\n(body)\nEOF`
+
+6. Validation (return { ok: true })
+  - Ensure all files exist and contain minimal valid content.
+  - If any are missing, halt with Resolution Needed and list missing files.

@@ -74,5 +74,29 @@
         ports: ["10000:10000/tcp"]
       *{ prefer non-root; timeout 30s }*
 
-9. Versioning (return { changesLogged: true })
-  - Track changes in VCS; update this file as the language evolves.
+9. Versioning (return { semver: true, features: true, runner: true, changesLogged: true })
+  a. Language SemVer
+    - Use x.y.z for the language/compiler (this folder). `major` = breaking syntax/semantics; `minor` = additive; `patch` = clarifications/bugfixes.
+  b. Feature gates
+    - New capabilities should be discoverable as features (e.g., `hContext`). Projects may require features via `_LANGUAGE.un`.
+  c. Runner version
+    - The executor (runner/agent) should declare its version. Projects may require a minimum via `_LANGUAGE.un`.
+  d. Changelog
+    - Track changes in VCS; update this file when the language evolves.
+
+10. Project requirements files (return { language: "_LANGUAGE.un", lock: "_LOCK.un", version: "_VERSION.un" })
+  a. `_LANGUAGE.un`
+    - Declares requirements to run the project under `undefined`.
+    - Example return: `{ name: "undefined", semver: "^1.0.0", features: ["context","returns","hContext","todo"] }` and `{ name: "undefined-runner", semver: "~0.1.0" }`.
+    - Purpose: compatibility gating and feature opt-ins.
+  b. `_LOCK.un`
+    - Pins the spec/rules and relevant tools used at author-time.
+    - Example fields: `{ specPath, rulesPath, specDigest, rulesDigest }`, and `{ python, docker, mcpClients: [] }` plus `{ lockedAt, environment, locked }`.
+    - Purpose: determinism and reproducibility.
+  c. `_VERSION.un` (optional)
+    - Project’s own app/package version (independent of language version).
+    - Minimal example: `{ version: "0.1.0" }`.
+
+11. Initialization guidance (return { initScript: "INIT_PROJECT.un" })
+  - Use `INIT_PROJECT.un` to scaffold new projects. It accepts `path`, `compilerPath`, and `entry`, and emits templates for all required files.
+  - Templates must reference `(compilerPath)` for inheritance and locking so the compiler folder can be dragged into any repo without edits.
