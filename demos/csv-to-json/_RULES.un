@@ -8,4 +8,5 @@
 
 3. Execution policy
   - Execute `python3 csv_to_json.py --path <path> --limit <limit>`.
+  - If `outPath` is present in context/state, append `--out <outPath>`.
   - Convert rows to objects using header row.

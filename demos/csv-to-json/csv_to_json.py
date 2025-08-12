@@ -5,6 +5,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('--path', help='CSV file path (optional). If omitted, read stdin')
     p.add_argument('--limit', type=int, help='max rows to read (excluding header)')
+    p.add_argument('--out', dest='out_path', help='optional output JSON file path')
     args = p.parse_args()
 
     if args.path:
@@ -19,10 +20,15 @@ def main():
         rows = list(reader)
         if args.limit is not None:
             rows = rows[: args.limit]
-        print(json.dumps({
+        payload = {
             'items': rows,
             'count': len(rows)
-        }))
+        }
+        text = json.dumps(payload)
+        if args.out_path:
+            with open(args.out_path, 'w', encoding='utf-8') as out_f:
+                out_f.write(text)
+        print(text)
     finally:
         if close_f:
             f.close()

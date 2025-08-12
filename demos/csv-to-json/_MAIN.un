@@ -1,8 +1,9 @@
 # Convert CSV to JSON (first 5 rows)
 
-1. Read CSV (return { path, limit })
+1. Read CSV (return { path, limit, outPath })
   context:
     path: "./demos/csv-to-json/sample.csv"
     limit: 5
+    outPath: "./demos/csv-to-json/output.json"
 
-2. Convert to JSON (return { items, count })
+2. Convert to JSON (return { items, count, outPath })

@@ -31,6 +31,8 @@
     - 3) accumulated state
     - 4) inline `()` derivations
     - else: Resolution Needed error
+  d. Optional/conditional arguments
+    - Functions may declare optional fields in `context:` (e.g., `outPath`). When present, the executor includes the corresponding CLI flags or tool args; when absent, they are omitted. This does not change core syntax.
   c. Validation
     - Each function encodes validation outcomes in its return (e.g., `isHealthy`).
 
