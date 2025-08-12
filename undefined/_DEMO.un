@@ -1,0 +1,1256 @@
+# Understanding MCP based programming language
+_Exported on 8/12/2025 at 01:23:34 EDT from Cursor (1.4.3)_
+
+---
+
+**User**
+
+Do you understand this MCP based programming language I'm making? I'm making it in natural language. A few hints:
+
+# implies the purpose of the program
+
+context: implies function parameters, to be listed after a functions declaration
+
+1., 2., ..., a, b, ..., i, ii, ..., -, imply functions, with each function outlining further specificity vertically, while also indicating piping of returns. I.e., the program is sequencial and intended to stay small. We aren't orchestrating anything here, keep it linear.
+
+() implies a return statement, i.e., this is how we'll embed further specificity within a function, a.k.a. horizontally.
+
+*{}* is a way to provide further context, horizontally -- e.g., something to keep in mind when implementing the solution.
+
+TODO is where the programmer left off, and intends to continue later. Like a save point. They may also use this as a breakpoint, to test if the program is working properly. The program would exit and print a log of the program's state/findings, to support iterative programming of this protocol.
+
+If you understand this MCP execution based programming language, please write an instruction protocol/ruleset doc(s) that you will refer to, to eventually follow. In these docs, use natural language to describe the syntax. Think of these docs as a compiler or library, i.e., a set of common instructions that you may reference at runtime, in case you get stuck or confused during the execution of a program. 
+
+Note, these docs you will reference aim to serve as the literal framework and infrastructure of a modern programming language that specializes in the execution and piping of MCP commands. As time goes on and new syntax is required to support different/more precise execution, you'll have to expand the docs to outline the given convention.
+
+---
+
+**Cursor**
+
+I'll create a new Markdown spec file in your project root with a clear ruleset for the MCP natural-language programming language you described, including syntax, execution semantics, state model, TODO breakpoint behavior, and MCP command invocation guidelines. Then I'll share a short preview and where to find it.
+
+```markdown
+<<'PATCH'
+*** Begin Patch
+*** Add File: /home/brian/projects/fun/vnc-and-xpra/MCP-Lang-Spec.md
+## MCP-Lang: Natural-Language Programming Rules for MCP Execution
+
+This document is the authoritative ruleset the agent will follow when interpreting and executing MCP-Lang programs. It defines syntax, semantics, execution model, state, logging, and error handling. It is designed for small, linear programs that orchestrate Model Context Protocol (MCP) tool commands with clear piping of results.
+
+### Design goals
+- **Simplicity**: Linear, readable, low ceremony. No branching by default.
+- **Deterministic piping**: Each function consumes the prior return and produces the next.
+- **MCP-first**: Steps translate to concrete MCP tool calls and transformations.
+- **Explorable state**: The agent maintains a canonical program state and logs it.
+- **Extensible**: Conventions can grow with new syntax while preserving backward compatibility.
+
+---
+
+## Core Syntax
+
+### Program purpose
+- A line starting with `#` states the purpose of the program. It sets global intent and informs tool selection, prompts, and validations.
+
+Example:
+- `# Provision an Ubuntu container, install Xpra, and expose a secured session.`
+
+### Functions (vertical sequence)
+- A function is declared by a leading marker on a new line:
+  - Decimal numerals: `1.`, `2.`, `3.`, ...
+  - Lowercase letters: `a.`, `b.`, ...
+  - Roman numerals: `i.`, `ii.`, `iii.`, ...
+  - Hyphen bullets: `-`
+- All function markers are equivalent for ordering; choose one style and keep it consistent within a block.
+- The program executes functions top-to-bottom. Returns are piped from each function to the next.
+- A function body is natural language describing the action to take and the expected return.
+
+Example:
+- `1. Build a Docker image for Xpra.`
+- `2. Run the container and confirm Xpra session is reachable.`
+
+### Context
+- A `context:` subsection beneath a function defines parameter requirements and hints used to resolve arguments for MCP tool calls.
+- Context may reference prior returns implicitly (see Execution Model) and can add constraints, defaults, or schemas.
+- Indent `context:` contents by two spaces or a tab for readability.
+
+Example:
+- `2. Run the container`
+  - `context:`
+    - `image: result.imageId`
+    - `ports: [10000:10000/tcp]`
+
+### Returns `()` (horizontal embedding)
+- Parentheses denote a return expression or an inline evaluation that yields a value.
+- Inline returns may appear within descriptive text to compute or refine values without creating a new vertical step.
+- The final value of a function is the canonical return for piping; it should be representable as a JSON-like structure.
+
+Examples:
+- `1. Build the image (return { imageId, tag })`
+- `2. Verify session (return { sessionUrl, isHealthy: true })`
+
+### Horizontal context `*{ }*`
+- An inline contextual block `*{ ... }*` supplies additional constraints, assumptions, or environmental notes. It is not executed but informs tool choice, prompts, and validation.
+
+Examples:
+- `Use Debian base *{ prefer slim images; x86_64 }*`
+- `Network is firewalled *{ outbound 443 only }*`
+
+### TODO breakpoints
+- `TODO` marks an intentional stop point. On encountering `TODO`, execution halts and the agent emits a structured state/log for inspection.
+- Use as a save point or a testing breakpoint.
+
+Example:
+- `3. Configure TLS for Xpra. TODO: verify cert issuance flow before proceeding.`
+
+---
+
+## Execution Model
+
+### Linear flow and piping
+- Execution proceeds top-to-bottom through functions.
+- The return of function `n` becomes the implicit input for function `n+1`.
+- If a function declares `context:`, the implicit input is merged with the context to form the call arguments for MCP commands.
+
+### Implicit input and program state
+- Let `S_n` be the program state after function `n`.
+  - `S_0` is empty aside from derived intent from the `#` purpose line.
+  - The function `n` receives `(S_{n-1}, priorReturn)` as available inputs.
+  - After execution, `priorReturn` is updated to the function's return, and `S_n` is updated by merging `S_{n-1}` with any new bindings discovered.
+- A function should return one JSON-like value: object, array, string, number, boolean, or null. Objects are preferred for named data.
+
+### MCP command invocation
+- The agent maps a function's description and context to one or more MCP tool calls:
+  - Select the most relevant MCP tool by capability and the `#` purpose.
+  - Construct arguments from `context:` first, then fill gaps from `priorReturn` and `S_{n-1}`.
+  - Pass non-interactive flags and defaults where applicable.
+  - Execute and capture the full machine-readable result and key human signals (stdout/stderr snippets).
+- If multiple MCP calls are required, they must remain conceptually atomic within the function: produce a single final return.
+
+### Idempotency and side effects
+- Where feasible, functions should be idempotent: re-running yields the same result state.
+- On unavoidable side effects (e.g., provisioning), return explicit identifiers (IDs, URLs, versions) so subsequent steps can detect prior completion.
+
+### Validation
+- Each function should validate critical assumptions before returning. Encode validation results in the return value (e.g., `isHealthy`, `exists`, `status`).
+
+---
+
+## Context and Binding Rules
+
+### Parameter resolution order
+1. Explicit values in `context:`
+2. Fields from `priorReturn`
+3. Fields from accumulated `S_{n-1}`
+4. Derivations obtained by lightweight inline evaluation `()`
+5. If unresolved, raise a Resolution Needed error and halt (see Errors)
+
+### Naming and addressing
+- When not explicitly named, the prior return is available as `it` conceptually for resolution logic.
+- Returns should use descriptive field names so later functions can reference them in `context:` (e.g., `imageId`, `sessionUrl`).
+
+### Inline evaluation
+- Inline `()` may request transformations or computations over available inputs. The agent performs these without introducing a new vertical function.
+
+Example:
+- `Set tag to (lowercase(repoName) + ":latest")`
+
+### Horizontal context precedence
+- `*{ }*` blocks inform tool selection, defaults, and safety constraints but never override explicit `context:` values.
+
+---
+
+## TODO and Logging
+
+### TODO behavior
+- On `TODO`, immediately stop execution and print a structured state snapshot:
+  - `programPurpose`: text from `#`
+  - `functionIndex`: the index (or marker) where the TODO was encountered
+  - `priorReturn`: last successful return value
+  - `state`: current merged program state
+  - `notes`: any `*{ }*` currently in scope
+
+### Logging
+- For each function, log:
+  - `marker`: e.g., `1.` or `ii.`
+  - `title`: the function’s one-line description
+  - `contextResolved`: final arguments after resolution
+  - `calls`: list of MCP calls with tool name, args, summarized outputs
+  - `return`: final JSON-like value
+  - `timing`: start, end, duration
+  - `warnings`: non-fatal issues
+
+---
+
+## Errors and Recovery
+
+### Resolution Needed
+- If required inputs cannot be resolved via the rules above, halt with a `Resolution Needed` error including:
+  - Missing fields
+  - Where they were expected to come from (`context`, `priorReturn`, or `state`)
+  - Suggestions for next steps or an edit to add/clarify `context:`
+
+### Tool Failure
+- On MCP tool errors, retry once if safe and idempotent. Otherwise, halt with a structured error including stdout/stderr excerpts and suggested remediation.
+
+### Partial Results
+- If a function performed partial side effects before failing, return a best-effort partial state with `status: "partial"` and identifiers to allow resumption.
+
+---
+
+## Canonical Return Shapes
+
+Prefer objects with explicit fields:
+- Success example: `{ imageId, tag, buildLogRef, status: "built" }`
+- Check example: `{ sessionUrl, isHealthy, probe: { code, latencyMs } }`
+- Provision example: `{ vmId, region, status: "ready" }`
+
+Arrays are acceptable when the semantic unit is a list. Include a `count` if useful.
+
+Strings/numbers are acceptable for leaf values, but avoid for multi-field outcomes.
+
+---
+
+## Minimal Examples
+
+### Example 1: Simple two-step flow
+
+# Build and verify Xpra image
+
+1. Build the Docker image for Xpra (return { imageId, tag })
+  context:
+    base: "debian:bookworm-slim"
+    dockerfilePath: "./Dockerfile-xpra"
+    buildArgs:
+      xpraVersion: "latest"
+
+2. Run a container and probe the session (return { sessionUrl, isHealthy })
+  context:
+    image: imageId
+    ports: ["10000:10000/tcp"]
+  *{ prefer non-root user; health check timeout 30s }*
+
+### Example 2: TODO breakpoint
+
+# Prepare TLS for Xpra
+
+a. Request a certificate (return { orderId, dnsChallenges })
+
+b. Configure DNS for challenges. TODO: inspect issued records before proceeding
+
+---
+
+## Extension Conventions
+
+- New syntax must remain human-readable and backward compatible.
+- Prefer declarative hints over imperative commands; the agent decides the concrete MCP calls.
+- When adding features (conditionals, loops, parallelism), introduce them as scoped blocks with explicit constraints rather than implicit behavior.
+- Propose new markers sparingly, and document resolution and precedence rules clearly.
+
+---
+
+## Agent Checklist (at runtime)
+
+- Read `#` to establish purpose and constraints.
+- For each function in order:
+  - Merge `context:` with `priorReturn` and state.
+  - Honor `*{ }*` as non-binding constraints.
+  - Select appropriate MCP tools; construct non-interactive, reproducible calls.
+  - Validate critical outcomes; produce a single canonical return value.
+  - Update state, log details.
+  - Stop immediately on `TODO`, Resolution Needed, or unrecoverable tool errors.
+- Emit final return and full log upon completion.
+
+---
+
+## Versioning
+
+- This document is versioned by date and commit in the repository history. Changes should include a short changelog at the bottom.
+
+Changelog:
+- 2025-08-12: Initial version.
+*** End Patch
+PATCH
+```
+
+Creating the MCP-Lang spec as a Markdown file in the project root so we can reference it during future executions.
+
+```markdown
+<<'PATCH'
+*** Begin Patch
+*** Add File: MCP-Lang-Spec.md
+## MCP-Lang: Natural-Language Programming Rules for MCP Execution
+
+This document is the authoritative ruleset the agent will follow when interpreting and executing MCP-Lang programs. It defines syntax, semantics, execution model, state, logging, and error handling. It is designed for small, linear programs that orchestrate Model Context Protocol (MCP) tool commands with clear piping of results.
+
+### Design goals
+- **Simplicity**: Linear, readable, low ceremony. No branching by default.
+- **Deterministic piping**: Each function consumes the prior return and produces the next.
+- **MCP-first**: Steps translate to concrete MCP tool calls and transformations.
+- **Explorable state**: The agent maintains a canonical program state and logs it.
+- **Extensible**: Conventions can grow with new syntax while preserving backward compatibility.
+
+---
+
+## Core Syntax
+
+### Program purpose
+- A line starting with `#` states the purpose of the program. It sets global intent and informs tool selection, prompts, and validations.
+
+Example:
+- `# Provision an Ubuntu container, install Xpra, and expose a secured session.`
+
+### Functions (vertical sequence)
+- A function is declared by a leading marker on a new line:
+  - Decimal numerals: `1.`, `2.`, `3.`, ...
+  - Lowercase letters: `a.`, `b.`, ...
+  - Roman numerals: `i.`, `ii.`, `iii.`, ...
+  - Hyphen bullets: `-`
+- All function markers are equivalent for ordering; choose one style and keep it consistent within a block.
+- The program executes functions top-to-bottom. Returns are piped from each function to the next.
+- A function body is natural language describing the action to take and the expected return.
+
+Example:
+- `1. Build a Docker image for Xpra.`
+- `2. Run the container and confirm Xpra session is reachable.`
+
+### Context
+- A `context:` subsection beneath a function defines parameter requirements and hints used to resolve arguments for MCP tool calls.
+- Context may reference prior returns implicitly (see Execution Model) and can add constraints, defaults, or schemas.
+- Indent `context:` contents by two spaces or a tab for readability.
+
+Example:
+- `2. Run the container`
+  - `context:`
+    - `image: result.imageId`
+    - `ports: [10000:10000/tcp]`
+
+### Returns `()` (horizontal embedding)
+- Parentheses denote a return expression or an inline evaluation that yields a value.
+- Inline returns may appear within descriptive text to compute or refine values without creating a new vertical step.
+- The final value of a function is the canonical return for piping; it should be representable as a JSON-like structure.
+
+Examples:
+- `1. Build the image (return { imageId, tag })`
+- `2. Verify session (return { sessionUrl, isHealthy: true })`
+
+### Horizontal context `*{ }*`
+- An inline contextual block `*{ ... }*` supplies additional constraints, assumptions, or environmental notes. It is not executed but informs tool choice, prompts, and validation.
+
+Examples:
+- `Use Debian base *{ prefer slim images; x86_64 }*`
+- `Network is firewalled *{ outbound 443 only }*`
+
+### TODO breakpoints
+- `TODO` marks an intentional stop point. On encountering `TODO`, execution halts and the agent emits a structured state/log for inspection.
+- Use as a save point or a testing breakpoint.
+
+Example:
+- `3. Configure TLS for Xpra. TODO: verify cert issuance flow before proceeding.`
+
+---
+
+## Execution Model
+
+### Linear flow and piping
+- Execution proceeds top-to-bottom through functions.
+- The return of function `n` becomes the implicit input for function `n+1`.
+- If a function declares `context:`, the implicit input is merged with the context to form the call arguments for MCP commands.
+
+### Implicit input and program state
+- Let `S_n` be the program state after function `n`.
+  - `S_0` is empty aside from derived intent from the `#` purpose line.
+  - The function `n` receives `(S_{n-1}, priorReturn)` as available inputs.
+  - After execution, `priorReturn` is updated to the function's return, and `S_n` is updated by merging `S_{n-1}` with any new bindings discovered.
+- A function should return one JSON-like value: object, array, string, number, boolean, or null. Objects are preferred for named data.
+
+### MCP command invocation
+- The agent maps a function's description and context to one or more MCP tool calls:
+  - Select the most relevant MCP tool by capability and the `#` purpose.
+  - Construct arguments from `context:` first, then fill gaps from `priorReturn` and `S_{n-1}`.
+  - Pass non-interactive flags and defaults where applicable.
+  - Execute and capture the full machine-readable result and key human signals (stdout/stderr snippets).
+- If multiple MCP calls are required, they must remain conceptually atomic within the function: produce a single final return.
+
+### Idempotency and side effects
+- Where feasible, functions should be idempotent: re-running yields the same result state.
+- On unavoidable side effects (e.g., provisioning), return explicit identifiers (IDs, URLs, versions) so subsequent steps can detect prior completion.
+
+### Validation
+- Each function should validate critical assumptions before returning. Encode validation results in the return value (e.g., `isHealthy`, `exists`, `status`).
+
+---
+
+## Context and Binding Rules
+
+### Parameter resolution order
+1. Explicit values in `context:`
+2. Fields from `priorReturn`
+3. Fields from accumulated `S_{n-1}`
+4. Derivations obtained by lightweight inline evaluation `()`
+5. If unresolved, raise a Resolution Needed error and halt (see Errors)
+
+### Naming and addressing
+- When not explicitly named, the prior return is available as `it` conceptually for resolution logic.
+- Returns should use descriptive field names so later functions can reference them in `context:` (e.g., `imageId`, `sessionUrl`).
+
+### Inline evaluation
+- Inline `()` may request transformations or computations over available inputs. The agent performs these without introducing a new vertical function.
+
+Example:
+- `Set tag to (lowercase(repoName) + ":latest")`
+
+### Horizontal context precedence
+- `*{ }*` blocks inform tool selection, defaults, and safety constraints but never override explicit `context:` values.
+
+---
+
+## TODO and Logging
+
+### TODO behavior
+- On `TODO`, immediately stop execution and print a structured state snapshot:
+  - `programPurpose`: text from `#`
+  - `functionIndex`: the index (or marker) where the TODO was encountered
+  - `priorReturn`: last successful return value
+  - `state`: current merged program state
+  - `notes`: any `*{ }*` currently in scope
+
+### Logging
+- For each function, log:
+  - `marker`: e.g., `1.` or `ii.`
+  - `title`: the function’s one-line description
+  - `contextResolved`: final arguments after resolution
+  - `calls`: list of MCP calls with tool name, args, summarized outputs
+  - `return`: final JSON-like value
+  - `timing`: start, end, duration
+  - `warnings`: non-fatal issues
+
+---
+
+## Errors and Recovery
+
+### Resolution Needed
+- If required inputs cannot be resolved via the rules above, halt with a `Resolution Needed` error including:
+  - Missing fields
+  - Where they were expected to come from (`context`, `priorReturn`, or `state`)
+  - Suggestions for next steps or an edit to add/clarify `context:`
+
+### Tool Failure
+- On MCP tool errors, retry once if safe and idempotent. Otherwise, halt with a structured error including stdout/stderr excerpts and suggested remediation.
+
+### Partial Results
+- If a function performed partial side effects before failing, return a best-effort partial state with `status: "partial"` and identifiers to allow resumption.
+
+---
+
+## Canonical Return Shapes
+
+Prefer objects with explicit fields:
+- Success example: `{ imageId, tag, buildLogRef, status: "built" }`
+- Check example: `{ sessionUrl, isHealthy, probe: { code, latencyMs } }`
+- Provision example: `{ vmId, region, status: "ready" }`
+
+Arrays are acceptable when the semantic unit is a list. Include a `count` if useful.
+
+Strings/numbers are acceptable for leaf values, but avoid for multi-field outcomes.
+
+---
+
+## Minimal Examples
+
+### Example 1: Simple two-step flow
+
+# Build and verify Xpra image
+
+1. Build the Docker image for Xpra (return { imageId, tag })
+  context:
+    base: "debian:bookworm-slim"
+    dockerfilePath: "./Dockerfile-xpra"
+    buildArgs:
+      xpraVersion: "latest"
+
+2. Run a container and probe the session (return { sessionUrl, isHealthy })
+  context:
+    image: imageId
+    ports: ["10000:10000/tcp"]
+  *{ prefer non-root user; health check timeout 30s }*
+
+### Example 2: TODO breakpoint
+
+# Prepare TLS for Xpra
+
+a. Request a certificate (return { orderId, dnsChallenges })
+
+b. Configure DNS for challenges. TODO: inspect issued records before proceeding
+
+---
+
+## Extension Conventions
+
+- New syntax must remain human-readable and backward compatible.
+- Prefer declarative hints over imperative commands; the agent decides the concrete MCP calls.
+- When adding features (conditionals, loops, parallelism), introduce them as scoped blocks with explicit constraints rather than implicit behavior.
+- Propose new markers sparingly, and document resolution and precedence rules clearly.
+
+---
+
+## Agent Checklist (at runtime)
+
+- Read `#` to establish purpose and constraints.
+- For each function in order:
+  - Merge `context:` with `priorReturn` and state.
+  - Honor `*{ }*` as non-binding constraints.
+  - Select appropriate MCP tools; construct non-interactive, reproducible calls.
+  - Validate critical outcomes; produce a single canonical return value.
+  - Update state, log details.
+  - Stop immediately on `TODO`, Resolution Needed, or unrecoverable tool errors.
+- Emit final return and full log upon completion.
+
+---
+
+## Versioning
+
+- This document is versioned by date and commit in the repository history. Changes should include a short changelog at the bottom.
+
+Changelog:
+- 2025-08-12: Initial version.
+*** End Patch
+PATCH
+```
+
+I’m going to add a new Markdown spec file to your project root that defines the MCP-Lang syntax and execution semantics, including purpose lines, function sequencing and piping, context resolution, inline returns, horizontal context, TODO breakpoints, logging, error handling, and extension rules. I'll save it as `MCP-Lang-Spec.md`.
+
+```markdown
+## MCP-Lang: Natural-Language Programming Rules for MCP Execution
+
+This document is the authoritative ruleset the agent will follow when interpreting and executing MCP-Lang programs. It defines syntax, semantics, execution model, state, logging, and error handling. It is designed for small, linear programs that orchestrate Model Context Protocol (MCP) tool commands with clear piping of results.
+
+### Design goals
+- **Simplicity**: Linear, readable, low ceremony. No branching by default.
+- **Deterministic piping**: Each function consumes the prior return and produces the next.
+- **MCP-first**: Steps translate to concrete MCP tool calls and transformations.
+- **Explorable state**: The agent maintains a canonical program state and logs it.
+- **Extensible**: Conventions can grow with new syntax while preserving backward compatibility.
+
+---
+
+## Core Syntax
+
+### Program purpose
+- A line starting with `#` states the purpose of the program. It sets global intent and informs tool selection, prompts, and validations.
+
+Example:
+- `# Provision an Ubuntu container, install Xpra, and expose a secured session.`
+
+### Functions (vertical sequence)
+- A function is declared by a leading marker on a new line:
+  - Decimal numerals: `1.`, `2.`, `3.`, ...
+  - Lowercase letters: `a.`, `b.`, ...
+  - Roman numerals: `i.`, `ii.`, `iii.`, ...
+  - Hyphen bullets: `-`
+- All function markers are equivalent for ordering; choose one style and keep it consistent within a block.
+- The program executes functions top-to-bottom. Returns are piped from each function to the next.
+- A function body is natural language describing the action to take and the expected return.
+
+Example:
+- `1. Build a Docker image for Xpra.`
+- `2. Run the container and confirm Xpra session is reachable.`
+
+### Context
+- A `context:` subsection beneath a function defines parameter requirements and hints used to resolve arguments for MCP tool calls.
+- Context may reference prior returns implicitly (see Execution Model) and can add constraints, defaults, or schemas.
+- Indent `context:` contents by two spaces or a tab for readability.
+
+Example:
+- `2. Run the container`
+  - `context:`
+    - `image: result.imageId`
+    - `ports: [10000:10000/tcp]`
+
+### Returns `()` (horizontal embedding)
+- Parentheses denote a return expression or an inline evaluation that yields a value.
+- Inline returns may appear within descriptive text to compute or refine values without creating a new vertical step.
+- The final value of a function is the canonical return for piping; it should be representable as a JSON-like structure.
+
+Examples:
+- `1. Build the image (return { imageId, tag })`
+- `2. Verify session (return { sessionUrl, isHealthy: true })`
+
+### Horizontal context `*{ }*`
+- An inline contextual block `*{ ... }*` supplies additional constraints, assumptions, or environmental notes. It is not executed but informs tool choice, prompts, and validation.
+
+Examples:
+- `Use Debian base *{ prefer slim images; x86_64 }*`
+- `Network is firewalled *{ outbound 443 only }*`
+
+### TODO breakpoints
+- `TODO` marks an intentional stop point. On encountering `TODO`, execution halts and the agent emits a structured state/log for inspection.
+- Use as a save point or a testing breakpoint.
+
+Example:
+- `3. Configure TLS for Xpra. TODO: verify cert issuance flow before proceeding.`
+
+---
+
+## Execution Model
+
+### Linear flow and piping
+- Execution proceeds top-to-bottom through functions.
+- The return of function `n` becomes the implicit input for function `n+1`.
+- If a function declares `context:`, the implicit input is merged with the context to form the call arguments for MCP commands.
+
+### Implicit input and program state
+- Let `S_n` be the program state after function `n`.
+  - `S_0` is empty aside from derived intent from the `#` purpose line.
+  - The function `n` receives `(S_{n-1}, priorReturn)` as available inputs.
+  - After execution, `priorReturn` is updated to the function's return, and `S_n` is updated by merging `S_{n-1}` with any new bindings discovered.
+- A function should return one JSON-like value: object, array, string, number, boolean, or null. Objects are preferred for named data.
+
+### MCP command invocation
+- The agent maps a function's description and context to one or more MCP tool calls:
+  - Select the most relevant MCP tool by capability and the `#` purpose.
+  - Construct arguments from `context:` first, then fill gaps from `priorReturn` and `S_{n-1}`.
+  - Pass non-interactive flags and defaults where applicable.
+  - Execute and capture the full machine-readable result and key human signals (stdout/stderr snippets).
+- If multiple MCP calls are required, they must remain conceptually atomic within the function: produce a single final return.
+
+### Idempotency and side effects
+- Where feasible, functions should be idempotent: re-running yields the same result state.
+- On unavoidable side effects (e.g., provisioning), return explicit identifiers (IDs, URLs, versions) so subsequent steps can detect prior completion.
+
+### Validation
+- Each function should validate critical assumptions before returning. Encode validation results in the return value (e.g., `isHealthy`, `exists`, `status`).
+
+---
+
+## Context and Binding Rules
+
+### Parameter resolution order
+1. Explicit values in `context:`
+2. Fields from `priorReturn`
+3. Fields from accumulated `S_{n-1}`
+4. Derivations obtained by lightweight inline evaluation `()`
+5. If unresolved, raise a Resolution Needed error and halt (see Errors)
+
+### Naming and addressing
+- When not explicitly named, the prior return is available as `it` conceptually for resolution logic.
+- Returns should use descriptive field names so later functions can reference them in `context:` (e.g., `imageId`, `sessionUrl`).
+
+### Inline evaluation
+- Inline `()` may request transformations or computations over available inputs. The agent performs these without introducing a new vertical function.
+
+Example:
+- `Set tag to (lowercase(repoName) + ":latest")`
+
+### Horizontal context precedence
+- `*{ }*` blocks inform tool selection, defaults, and safety constraints but never override explicit `context:` values.
+
+---
+
+## TODO and Logging
+
+### TODO behavior
+- On `TODO`, immediately stop execution and print a structured state snapshot:
+  - `programPurpose`: text from `#`
+  - `functionIndex`: the index (or marker) where the TODO was encountered
+  - `priorReturn`: last successful return value
+  - `state`: current merged program state
+  - `notes`: any `*{ }*` currently in scope
+
+### Logging
+- For each function, log:
+  - `marker`: e.g., `1.` or `ii.`
+  - `title`: the function’s one-line description
+  - `contextResolved`: final arguments after resolution
+  - `calls`: list of MCP calls with tool name, args, summarized outputs
+  - `return`: final JSON-like value
+  - `timing`: start, end, duration
+  - `warnings`: non-fatal issues
+
+---
+
+## Errors and Recovery
+
+### Resolution Needed
+- If required inputs cannot be resolved via the rules above, halt with a `Resolution Needed` error including:
+  - Missing fields
+  - Where they were expected to come from (`context`, `priorReturn`, or `state`)
+  - Suggestions for next steps or an edit to add/clarify `context:`
+
+### Tool Failure
+- On MCP tool errors, retry once if safe and idempotent. Otherwise, halt with a structured error including stdout/stderr excerpts and suggested remediation.
+
+### Partial Results
+- If a function performed partial side effects before failing, return a best-effort partial state with `status: "partial"` and identifiers to allow resumption.
+
+---
+
+## Canonical Return Shapes
+
+Prefer objects with explicit fields:
+- Success example: `{ imageId, tag, buildLogRef, status: "built" }`
+- Check example: `{ sessionUrl, isHealthy, probe: { code, latencyMs } }`
+- Provision example: `{ vmId, region, status: "ready" }`
+
+Arrays are acceptable when the semantic unit is a list. Include a `count` if useful.
+
+Strings/numbers are acceptable for leaf values, but avoid for multi-field outcomes.
+
+---
+
+## Minimal Examples
+
+### Example 1: Simple two-step flow
+
+# Build and verify Xpra image
+
+1. Build the Docker image for Xpra (return { imageId, tag })
+  context:
+    base: "debian:bookworm-slim"
+    dockerfilePath: "./Dockerfile-xpra"
+    buildArgs:
+      xpraVersion: "latest"
+
+2. Run a container and probe the session (return { sessionUrl, isHealthy })
+  context:
+    image: imageId
+    ports: ["10000:10000/tcp"]
+  *{ prefer non-root user; health check timeout 30s }*
+
+### Example 2: TODO breakpoint
+
+# Prepare TLS for Xpra
+
+a. Request a certificate (return { orderId, dnsChallenges })
+
+b. Configure DNS for challenges. TODO: inspect issued records before proceeding
+
+---
+
+## Extension Conventions
+
+- New syntax must remain human-readable and backward compatible.
+- Prefer declarative hints over imperative commands; the agent decides the concrete MCP calls.
+- When adding features (conditionals, loops, parallelism), introduce them as scoped blocks with explicit constraints rather than implicit behavior.
+- Propose new markers sparingly, and document resolution and precedence rules clearly.
+
+---
+
+## Agent Checklist (at runtime)
+
+- Read `#` to establish purpose and constraints.
+- For each function in order:
+  - Merge `context:` with `priorReturn` and state.
+  - Honor `*{ }*` as non-binding constraints.
+  - Select appropriate MCP tools; construct non-interactive, reproducible calls.
+  - Validate critical outcomes; produce a single canonical return value.
+  - Update state, log details.
+  - Stop immediately on `TODO`, Resolution Needed, or unrecoverable tool errors.
+- Emit final return and full log upon completion.
+
+---
+
+## Versioning
+
+- This document is versioned by date and commit in the repository history. Changes should include a short changelog at the bottom.
+
+Changelog:
+- 2025-08-12: Initial version.
+```
+
+I added a new spec file defining the MCP-Lang syntax and execution rules, and I'll quickly check for any linting issues in that file.
+
+### Yes—I understand your MCP execution-focused natural language language
+
+I created a spec you (and I) can reference during execution and future expansion:
+- File: `MCP-Lang-Spec.md` (project root)
+
+It defines:
+- Purpose line `#`, vertical functions with markers (`1.`, `a.`, `i.`, `-`)
+- `context:` for parameter resolution
+- Inline returns `()` and horizontal context `*{ }*`
+- Linear execution and piping semantics
+- TODO breakpoints and structured logging
+- Error handling and resolution rules
+- Canonical return shapes and examples
+- Extension conventions to evolve the language
+
+If you want, I can add a minimal “parser/executor” skeleton next that reads this format from a `.md` file and runs a dry-run to produce the structured logs defined by the spec.
+
+- Created `MCP-Lang-Spec.md` with the ruleset you described, including execution semantics, context resolution, TODO behavior, and extension guidelines.
+- No lint issues detected.
+
+---
+
+**User**
+
+Read the README.md of my new programming language called undefined, then iterate on the language's natural language based compiler. A first prototype of the scripting language is in plan.un. I also need to convert MCP-Lang-Spec.md into the .un format and workflow.
+
+---
+
+**Cursor**
+
+I'll scan the relevant `.un` and spec files to understand the current language prototype and then produce edits: create a `.un` version of the MCP spec, extend `_RULES.un` for runtime behavior, and update `_TO-BE-DEFINED.un` with next design questions. I'll read the files in parallel.
+
+Creating and updating the undefined language compiler artifacts now: converting the spec into `.un` files, tightening runtime rules, and listing next design questions.
+
+```plaintext
+# undefined: runtime rules (scoped to this directory and descendants)
+
+1. Program purpose
+  - `#` defines the program’s purpose. It informs tool selection, prompts, and validations.
+
+2. Functions and ordering
+  - A function is any line starting with one of: `1.`, `2.`, ..., `a.`, `b.`, ..., `i.`, `ii.`, ..., or `-`.
+  - Execute functions top-to-bottom. Returns are piped from each function to the next.
+  - Nesting increases specificity; inner steps refine or support the parent step.
+
+3. Context
+  - `context:` under a function provides arguments/hints for MCP calls.
+  - Resolution order: (1) `context:` explicit values, (2) prior return, (3) accumulated program state, (4) inline `()` derivations. If unresolved, halt with a Resolution Needed error.
+
+4. Returns `()`
+  - Parentheses denote a return expression or inline evaluation. Each function must yield a single canonical value (prefer objects).
+
+5. Horizontal context `*{ }*`
+  - Non-binding constraints and notes. Influence defaults and safety checks, never override `context:` explicitly.
+
+6. TODO
+  - On `TODO`, stop and print a structured snapshot: purpose, marker, priorReturn, state, notes.
+
+7. Logging
+  - For each function, log: marker, title, resolved context, MCP calls (tool, args, summarized outputs), return, timing, warnings.
+
+8. Idempotency and side effects
+  - Prefer idempotent steps. When side effects occur, return explicit identifiers to enable detection and resumption.
+
+9. Errors
+  - Resolution Needed: list missing fields, expected sources, suggested edits.
+  - Tool Failure: one safe retry; otherwise halt with structured error including stdout/stderr excerpts.
+  - Partial Results: return `status: "partial"` with identifiers.
+
+10. Cascading rules
+  - `_RULES.un` files cascade: a child directory inherits parent rules; child may add rules but should not silently contradict parents. If overriding, state it explicitly in the child rules.
+
+11. Private/meta files
+  - Files beginning with `_` are private/meta and not used directly at runtime except `_RULES.un` and `WORKFLOW.un`.
+  - ALL-CAPS filenames are mutable, intended to evolve frequently.
+
+12. Spec location
+  - Canonical spec for this directory: `SPEC.un`. Execution workflow: `WORKFLOW.un`.
+```
+
+```plaintext
+# Open design questions for undefined (scoped to this directory)
+
+1. Folder structure
+  - When should an instruction set be factored into a new folder/module? What are criteria (size, cohesion, external dependencies)?
+
+2. ALL-CAPS semantics
+  - Should ALL-CAPS `.un` files denote canonical, actively evolving specs (e.g., `SPEC.un`, `WORKFLOW.un`)? How do we version them?
+
+3. Spec placement
+  - Should `SPEC.un` live here or in `project/` as well? How do we handle multi-project reuse of language rules?
+
+4. Executor
+  - Where does the runner live (CLI vs. agent)? How does it discover entry files (e.g., `plan.un`), and how does it locate cascading `_RULES.un`?
+
+5. State model
+  - What is the precise JSON schema for the program state snapshot? How do we persist/restore between runs? What fields are mandatory?
+
+6. MCP tool registry
+  - How do we enumerate available MCP tools and their capabilities? How do we rank/select tools given `#` purpose and `context:`?
+
+7. Conditionals and loops (future)
+  - How will we add minimal conditionals or bounded loops without breaking linearity? Proposed syntax and constraints?
+
+8. Security and safety
+  - What defaults for non-interactive execution, sandboxing, secret handling, and network constraints should be enforced by default?
+
+9. Testing
+  - What is the minimal test format for steps (golden returns, probes)? Can we simulate MCP calls in a dry-run mode?
+
+10. Determinism
+  - How do we record inputs and outputs to ensure runs are reproducible? How do we capture environment/version fingerprints?
+
+11. Error policy
+  - Standard taxonomy and recovery paths beyond current rules (e.g., backoff, circuit breaker, compensating actions)?
+
+12. Editor integration
+  - How should authoring assistance work (linting of `context:`, validation of markers, quick-fixes for Resolution Needed)? 
+```
+
+```plaintext
+# undefined language spec for MCP execution
+
+1. Design goals (return { readability: true, linear: true, mcpFirst: true, extensible: true })
+  - Keep programs small and linear. Avoid branching by default.
+  - Treat each function as a transformation that consumes prior return and produces the next.
+  - Optimize for MCP tool invocation and data piping.
+
+2. Core syntax (return { markers: ["1.", "a.", "i.", "-"], context: true, returns: true, hContext: true, todo: true })
+  a. Purpose line
+    - `#` states purpose; influences tool choice and validation.
+  b. Functions (vertical)
+    - Markers: `1.`, `2.`, ..., `a.`, `b.`, ..., `i.`, `ii.`, ..., `-`.
+    - Execute top-to-bottom; nested items refine parent.
+  c. `context:`
+    - Parameters/hints resolved before execution.
+    - Indented block under a function.
+  d. Returns `()`
+    - Inline evaluation and explicit return value for the function.
+  e. Horizontal context `*{ }*`
+    - Non-binding constraints used for defaults/safety.
+  f. TODO
+    - Halts with a structured snapshot.
+
+3. Execution model (return { state: true, piping: true, idempotency: preferred })
+  a. State and piping
+    - Prior return is implicit input for the next function.
+    - Accumulate state as a merged object across functions.
+  b. Parameter resolution (strict order)
+    - 1) `context:` explicit values
+    - 2) `priorReturn`
+    - 3) accumulated state
+    - 4) inline `()` derivations
+    - else: Resolution Needed error
+  c. Validation
+    - Each function encodes validation outcomes in its return (e.g., `isHealthy`).
+
+4. MCP invocation (return { selection: "capability+purpose", nonInteractive: true })
+  a. Tool selection
+    - Choose based on capabilities and program purpose.
+  b. Call construction
+    - Build args from `context:`; fill from priorReturn/state; honor non-interactive flags.
+  c. Atomicity
+    - If multiple calls are needed, return a single consolidated value.
+
+5. Logging (return { perStep: true, snapshotOnTODO: true })
+  a. Per function
+    - Log marker, title, resolved context, calls, return, timing, warnings.
+  b. TODO snapshot
+    - Log purpose, marker, priorReturn, state, notes.
+
+6. Errors (return { resolutionNeeded: true, toolFailure: true, partialResults: true })
+  a. Resolution Needed
+    - List missing fields, expected sources, suggested edits.
+  b. Tool Failure
+    - One safe retry; else halt with structured error (stdout/stderr excerpts).
+  c. Partial Results
+    - Return `status: "partial"` with persistent identifiers.
+
+7. Canonical returns (return { preferObjects: true })
+  - Prefer objects with explicit fields. Arrays acceptable for lists; include counts when helpful.
+
+8. Minimal examples
+  a. Build and verify image
+    i. `# Build and verify Xpra image`
+    ii. `1. Build Docker image (return { imageId, tag })`
+      context:
+        base: "debian:bookworm-slim"
+        dockerfilePath: "./Dockerfile-xpra"
+    iii. `2. Run and probe (return { sessionUrl, isHealthy })`
+      context:
+        image: imageId
+        ports: ["10000:10000/tcp"]
+      *{ prefer non-root; timeout 30s }*
+
+9. Versioning (return { changesLogged: true })
+  - Track changes in VCS; update this file as the language evolves.
+```
+
+```plaintext
+# undefined runtime workflow
+
+1. Read purpose
+  - Parse `#` to establish global intent and constraints.
+
+2. Initialize state (return { state: {}, priorReturn: null })
+
+3. For each function in order
+  a. Collect inputs
+    - Start from `context:` (if present)
+    - Merge with `priorReturn`
+    - Merge with accumulated state
+    - Apply inline `()` derivations
+  b. Select MCP tool(s)
+    - Based on capability and purpose; prefer non-interactive flags.
+  c. Execute
+    - Perform calls; keep them conceptually atomic; capture machine-readable results and key human signals.
+  d. Validate and return
+    - Validate critical assumptions; compute the single canonical return value.
+  e. Update state
+    - Merge new bindings into state; set `priorReturn` to current return.
+  f. Log
+    - Record marker, title, resolved context, calls, return, timing, warnings.
+  g. Handle TODO
+    - On `TODO`, stop and output snapshot { purpose, marker, priorReturn, state, notes }.
+
+4. Errors
+  - Resolution Needed: halt with details and suggested edits.
+  - Tool Failure: retry once if safe; else halt with structured error.
+  - Partial Results: return identifiers with `status: "partial"`.
+
+5. Complete
+  - Emit final return and full log.
+```
+
+I read your `undefined/README.md`, the initial `_RULES.un` and `_TO-BE-DEFINED.un`, your `project/plan.un`, and the existing `undefined/MCP-Lang-Spec.md`. I converted the spec into `.un` artifacts and strengthened the compiler/runtime rules. I’m now adding project-scoped runtime rules to execute `project/plan.un` under the same model.
+
+```plaintext
+# Project runtime rules (inherits from ../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../undefined/_RULES.un`.
+
+2. Entry point
+  - Default entry file: `plan.un` in this directory.
+
+3. Tooling defaults
+  - Prefer non-interactive flags for all MCP calls.
+  - Record stdout/stderr excerpts for logs; store machine-readable outputs in state.
+
+4. Safety
+  - Network: outbound-only; avoid secret exfiltration; redact tokens in logs.
+  - Filesystem: write only within project directory by default.
+
+5. Identifiers to return
+  - When cloning or creating repos/containers, return explicit IDs/URLs/tags to enable idempotent resume.
+
+6. TODO snapshot fields
+  - Include: `purpose`, `marker`, `priorReturn`, `state`, `notes`, `project: true`.
+```
+
+- Read `undefined/README.md` and aligned with its vision: natural-language compiler, self-hosted, Unix-y, meta `_` files, and progressive self-definition.
+- Converted `MCP-Lang-Spec.md` into `.un` workflow:
+  - Added `undefined/SPEC.un` (spec as `.un`)
+  - Added `undefined/WORKFLOW.un` (runtime execution workflow)
+  - Replaced `undefined/_RULES.un` with concrete runtime rules (cascading, resolution order, TODO/logging/error policies)
+  - Expanded `undefined/_TO-BE-DEFINED.un` with specific open design questions
+  - Added `project/_RULES.un` to execute `project/plan.un` with project-scoped defaults
+
+Want me to run a dry-run “execution” of `project/plan.un` per `WORKFLOW.un` and output the structured snapshot/logs (stopping at the TODO)?
+
+---
+
+**User**
+
+Instead of working on project/plan.un, use this framework to build a calculator app, where _MAIN.un is the entry point.
+
+---
+
+**Cursor**
+
+Reading the existing calculator entry point and creating the necessary calculator-specific rules and workflow so it can run under the undefined framework.
+
+Creating calculator app artifacts under `calculator/` using the undefined framework: rules, workflow, spec, backend Python, and updating `_MAIN.un` to a runnable linear program.
+
+```plaintext
+# Calculator runtime rules (inherits from ../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Inputs
+  - Accept `op`, `a`, and `b` from (in order): function `context:`, priorReturn, accumulated state.
+  - Supported operations: `add`, `sub`, `mul`, `div`.
+
+4. Execution policy
+  - Execute calculations via `python3 calc.py --op <op> --a <a> --b <b>`.
+  - Parse JSON output `{ result, op, a, b }` and pipe it as the function return.
+
+5. Safety
+  - Division by zero must return a structured error and halt.
+
+6. Logging
+  - For each calculation, log inputs, selected operation, and numeric result.
+
+7. TODO snapshot
+  - Include `purpose`, `marker`, `priorReturn`, `state`, `notes`, `app: "calculator"`.
+```
+
+```plaintext
+# Calculator workflow
+
+1. Read purpose
+  - Parse `#` for app intent: simple arithmetic via Python backend.
+
+2. Initialize state (return { state: {}, priorReturn: null })
+
+3. For each function
+  a. Resolve inputs
+    - Use `context:` → priorReturn → state → inline `()`.
+  b. Execute backend
+    - Run `python3 calc.py` with resolved args; capture JSON.
+  c. Validate
+    - Ensure `result` is finite; if `div` and `b == 0`, halt with error.
+  d. Return and update
+    - Return `{ op, a, b, result }`; merge into state; set priorReturn.
+  e. Log
+    - Marker, title, resolved inputs, result, timing, warnings.
+  f. TODO
+    - On `TODO`, stop with snapshot.
+
+4. Completion
+  - Emit final result and logs.
+```
+
+```plaintext
+# Calculator app spec
+
+1. Operations (return { supported: ["add", "sub", "mul", "div"] })
+  - `add(a,b) = a + b`
+  - `sub(a,b) = a - b`
+  - `mul(a,b) = a * b`
+  - `div(a,b) = a / b` if `b != 0` else error
+
+2. Types (return { number: "float64" })
+  - Accept integers and floats; coerce to float for operations; return float.
+
+3. IO (return { cli: true, json: true })
+  - CLI: `python3 calc.py --op <op> --a <num> --b <num>`
+  - Output JSON: `{ op, a, b, result }` on success; `{ error, code }` on failure.
+
+4. Idempotency
+  - Pure calculations are idempotent; no side effects.
+
+5. Errors
+  - `DIVIDE_BY_ZERO`: when `op == "div"` and `b == 0`.
+  - `INVALID_OPERATION`: unsupported `op`.
+  - `INVALID_NUMBER`: malformed `a` or `b`.
+```
+
+```plaintext
+# calculator: a simple calculator app that leverages a python backend script for calculations
+
+1. Prepare inputs (return { op, a, b })
+  context:
+    /* Provide inputs via context, priorReturn, or state. Defaults below are for demo. */
+    op: add
+    a: 2
+    b: 3
+
+2. Perform calculation using backend (return { op, a, b, result })
+  context:
+    op: op
+    a: a
+    b: b
+  - Execute `python3 calc.py --op (op) --a (a) --b (b)` and parse JSON output.
+  *{ non-interactive; halt on errors; log stdout/stderr excerpts }*
+
+3. Report result (return { expression: (op), left: (a), right: (b), result })
+  - Present the final computed value; ready to be consumed by downstream steps.
+```
+
+```python
+#!/usr/bin/env python3
+import argparse
+import json
+import math
+import sys
+
+
+def calculate(operation: str, left: float, right: float) -> float:
+    if operation == "add":
+        return left + right
+    if operation == "sub":
+        return left - right
+    if operation == "mul":
+        return left * right
+    if operation == "div":
+        if right == 0:
+            raise ZeroDivisionError("division by zero")
+        return left / right
+    raise ValueError(f"unsupported operation: {operation}")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Calculator backend")
+    parser.add_argument("--op", required=True, choices=["add", "sub", "mul", "div"], help="operation")
+    parser.add_argument("--a", required=True, type=float, help="left operand")
+    parser.add_argument("--b", required=True, type=float, help="right operand")
+    args = parser.parse_args()
+
+    try:
+        result = calculate(args.op, args.a, args.b)
+        if not math.isfinite(result):
+            raise ArithmeticError("non-finite result")
+        print(json.dumps({
+            "op": args.op,
+            "a": args.a,
+            "b": args.b,
+            "result": result
+        }))
+        return 0
+    except ZeroDivisionError:
+        print(json.dumps({"error": "DIVIDE_BY_ZERO", "code": "DIVIDE_BY_ZERO"}))
+        return 2
+    except ValueError as e:
+        print(json.dumps({"error": str(e), "code": "INVALID_OPERATION"}))
+        return 3
+    except Exception as e:
+        print(json.dumps({"error": str(e), "code": "INTERNAL_ERROR"}))
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+```markdown
+# Calculator (undefined framework)
+
+- Entry: `_MAIN.un`
+- Backend: `calc.py` (Python 3)
+
+Run backend directly:
+
+```bash
+python3 calc.py --op add --a 2 --b 3
+```
+
+Example `_MAIN.un` flow:
+- Step 1 sets `{ op, a, b }`
+- Step 2 calls backend and returns `{ op, a, b, result }`
+- Step 3 reports the final result
+```
+
+- Created `calculator/` app using the undefined framework:
+  - `calculator/_MAIN.un`: runnable linear program using `context:`, MCP-style execution, and result piping.
+  - `calculator/_RULES.un`: inherits undefined rules; defines entry point, inputs, backend invocation, safety, logging.
+  - `calculator/WORKFLOW.un`: execution workflow for resolving inputs, running backend, validating, returning, and logging.
+  - `calculator/SPEC.un`: operation definitions, types, IO contract, error taxonomy.
+  - `calculator/calc.py`: Python backend that performs arithmetic and prints JSON to stdout with proper exit codes.
+  - `calculator/README.md`: quick usage.
+
+- Integrated your update for human comments `/** ... */` in `.un` files, which is compatible with the new app.
+
+Want me to simulate running `_MAIN.un` per `WORKFLOW.un` (dry-run) and show the structured snapshot and final return?
+
+---
+
+**User**
+
+No, actually follow the instructions from the .un files (using the terminal to when necessary) to calculate 12315251 x 10519251.
+
+---
+
+**Cursor**
+
+Executing the calculator workflow: resolving inputs (op=mul, a=12315251, b=10519251) and invoking the Python backend per `calculator/WORKFLOW.un`.
+
+- Result: 12315251 × 10519251 = 129547216397001
+
+- Backend output:
+```json
+{"op": "mul", "a": 12315251.0, "b": 10519251.0, "result": 129547216397001.0}
+```
+
+- Followed `calculator/WORKFLOW.un`: resolved inputs, executed `calc.py`, parsed JSON, returned final value.
+
+```json
+{"op": "mul", "a": 12315251.0, "b": 10519251.0, "result": 129547216397001.0}
+```
+

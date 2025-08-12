@@ -1,1 +1,19 @@
 # calculator: a simple calculator app that leverages a python backend script for calculations
+
+1. Prepare inputs (return { op, a, b })
+  context:
+    /* Provide inputs via context, priorReturn, or state. Defaults below are for demo. */
+    op: add
+    a: 2
+    b: 3
+
+2. Perform calculation using backend (return { op, a, b, result })
+  context:
+    op: op
+    a: a
+    b: b
+  - Execute `python3 calc.py --op (op) --a (a) --b (b)` and parse JSON output.
+  *{ non-interactive; halt on errors; log stdout/stderr excerpts }*
+
+3. Report result (return { expression: (op), left: (a), right: (b), result })
+  - Present the final computed value; ready to be consumed by downstream steps.

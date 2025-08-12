@@ -1,0 +1,23 @@
+# Calculator workflow
+
+1. Read purpose
+  - Parse `#` for app intent: simple arithmetic via Python backend.
+
+2. Initialize state (return { state: {}, priorReturn: null })
+
+3. For each function
+  a. Resolve inputs
+    - Use `context:` → priorReturn → state → inline `()`.
+  b. Execute backend
+    - Run `python3 calc.py` with resolved args; capture JSON.
+  c. Validate
+    - Ensure `result` is finite; if `div` and `b == 0`, halt with error.
+  d. Return and update
+    - Return `{ op, a, b, result }`; merge into state; set priorReturn.
+  e. Log
+    - Marker, title, resolved inputs, result, timing, warnings.
+  f. TODO
+    - On `TODO`, stop with snapshot.
+
+4. Completion
+  - Emit final result and logs.

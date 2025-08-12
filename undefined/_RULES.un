@@ -46,3 +46,5 @@
   - Sometimes, a human developer may want to manually add comments, thoughts, or questions to .un files, without influencing the syntax/formatting that you've defined. These can be placed anywhere in a .un script, and will just be denoted by the contents within /**/.
 
 /* make sure to develop the compiler during execution, if a better syntax or processing method is thought of or discovered. */
+
+14. `_DEMO.un` files represent a successful execution of the script, scoped to the _DEMO.un file's location.

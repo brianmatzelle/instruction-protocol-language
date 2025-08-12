@@ -1,0 +1,22 @@
+# Calculator app spec
+
+1. Operations (return { supported: ["add", "sub", "mul", "div"] })
+  - `add(a,b) = a + b`
+  - `sub(a,b) = a - b`
+  - `mul(a,b) = a * b`
+  - `div(a,b) = a / b` if `b != 0` else error
+
+2. Types (return { number: "float64" })
+  - Accept integers and floats; coerce to float for operations; return float.
+
+3. IO (return { cli: true, json: true })
+  - CLI: `python3 calc.py --op <op> --a <num> --b <num>`
+  - Output JSON: `{ op, a, b, result }` on success; `{ error, code }` on failure.
+
+4. Idempotency
+  - Pure calculations are idempotent; no side effects.
+
+5. Errors
+  - `DIVIDE_BY_ZERO`: when `op == "div"` and `b == 0`.
+  - `INVALID_OPERATION`: unsupported `op`.
+  - `INVALID_NUMBER`: malformed `a` or `b`.

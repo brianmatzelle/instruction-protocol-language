@@ -1,0 +1,24 @@
+# Calculator runtime rules (inherits from ../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Inputs
+  - Accept `op`, `a`, and `b` from (in order): function `context:`, priorReturn, accumulated state.
+  - Supported operations: `add`, `sub`, `mul`, `div`.
+
+4. Execution policy
+  - Execute calculations via `python3 calc.py --op <op> --a <a> --b <b>`.
+  - Parse JSON output `{ result, op, a, b }` and pipe it as the function return.
+
+5. Safety
+  - Division by zero must return a structured error and halt.
+
+6. Logging
+  - For each calculation, log inputs, selected operation, and numeric result.
+
+7. TODO snapshot
+  - Include `purpose`, `marker`, `priorReturn`, `state`, `notes`, `app: "calculator"`.
