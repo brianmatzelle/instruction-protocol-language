@@ -1,9 +1,9 @@
-# Convert Celsius to Fahrenheit
+# Convert Celsius to Fahrenheit, leveraging a Python script for backend calculations
 
 1. Read inputs (return { c })
   context:
     c: 21
 
-2. Compute Fahrenheit (return { c, f: ((c * 9/5) + 32) })
+2. Compute Fahrenheit using Python (return { c, f: ((c * 9/5) + 32) })
 
 3. Report (return { expression: "C->F", c, f })

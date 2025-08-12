@@ -34,4 +34,14 @@
   - Standard taxonomy and recovery paths beyond current rules (e.g., backoff, circuit breaker, compensating actions)?
 
 12. Editor integration
-  - How should authoring assistance work (linting of `context:`, validation of markers, quick-fixes for Resolution Needed)? 
+  - How should authoring assistance work (linting of `context:`, validation of markers, quick-fixes for Resolution Needed)?
+
+13. Language binding ambiguity (PRIORITY)
+  - How do we handle cases where multiple languages could be inferred? (e.g., "using Python and JavaScript")
+  - Should we support language-specific context blocks? (e.g., `python_context:`, `js_context:`)
+  - What about language version specification? (e.g., "using Python 3.11")
+
+14. Hybrid computation clarity
+  - When is inline computation preferred vs external language execution?
+  - Should we have explicit syntax to force inline computation even when language is mentioned?
+  - How do we handle mathematical expressions that could be computed either way? 

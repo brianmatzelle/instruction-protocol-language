@@ -24,7 +24,13 @@
 7. Logging
   - For each function, log: marker, title, resolved context, MCP calls (tool, args, summarized outputs), return, timing, warnings.
 
-8. Idempotency and side effects
+8. External language binding (NEW)
+  - When function descriptions mention specific programming languages (e.g., "using Python", "leveraging JavaScript", "with Rust"), the executor MUST invoke that language's runtime.
+  - Language binding keywords: "using", "with", "via", "leveraging", "through", followed by language name.
+  - Priority: External language execution > inline computation when language is specified.
+  - Examples: "Compute using Python" → invoke python3, "Process with Node.js" → invoke node.
+
+9. Idempotency and side effects
   - Prefer idempotent steps. When side effects occur, return explicit identifiers to enable detection and resumption.
 
 9. Errors
@@ -52,3 +58,5 @@
 /* make sure to develop the compiler during execution, if a better syntax or processing method is thought of or discovered. */
 
  15. `_DEMO.un` files represent a successful execution of the script, scoped to the _DEMO.un file's location.
+
+/* you made need to code helper files in other programming languages at 'runtime' */

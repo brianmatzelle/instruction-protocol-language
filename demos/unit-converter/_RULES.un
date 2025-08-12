@@ -10,7 +10,7 @@
   - Accept `c` (Celsius) via `context:`, priorReturn, or state.
 
 4. Execution policy
-  - Prefer inline evaluation for arithmetic; no external calls required.
+  - Prefer programmatic evaluation for arithmetic
 
 5. Logging
   - Log input `c` and computed `f`.

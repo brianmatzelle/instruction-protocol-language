@@ -36,12 +36,17 @@
   c. Validation
     - Each function encodes validation outcomes in its return (e.g., `isHealthy`).
 
-4. MCP invocation (return { selection: "capability+purpose", nonInteractive: true, localCliAsTools: true })
+4. MCP invocation (return { selection: "capability+purpose", nonInteractive: true, localCliAsTools: true, languageBinding: true })
   a. Tool selection
     - Choose based on capabilities and program purpose. Local CLI/scripts may be invoked as tools when appropriate.
+    - **Language binding priority**: When function description explicitly mentions a programming language (e.g., "using Python", "with JavaScript", "via Rust"), that language MUST be invoked, not inline computation.
   b. Call construction
     - Build args from `context:`; fill from priorReturn/state; honor non-interactive flags.
-  c. Atomicity
+    - For external language calls, prefer direct execution over inline evaluation.
+  c. Language integration syntax
+    - Functions may specify execution environment: `using <language>`, `with <language>`, `via <language>`, `leveraging <language>`
+    - When specified, executor must invoke that language's runtime/interpreter.
+  d. Atomicity
     - If multiple calls are needed, return a single consolidated value.
 
 5. Logging (return { perStep: true, snapshotOnTODO: true })
