@@ -1,0 +1,5 @@
+# JSON selector spec
+
+1. Inputs (return { path })
+2. Output (return { data })
+3. Selection example (return { name, version })

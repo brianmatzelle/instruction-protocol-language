@@ -1,0 +1,7 @@
+# Select fields from JSON
+
+1. Load JSON (return { data })
+  context:
+    path: "./package.json"
+
+2. Pick (return { name: (data.name), version: (data.version) })

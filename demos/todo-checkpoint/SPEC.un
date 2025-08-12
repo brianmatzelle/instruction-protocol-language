@@ -1,0 +1,4 @@
+# TODO checkpoint spec
+
+1. Behavior (return { snapshot: true })
+  - Emit state snapshot and halt at TODO.

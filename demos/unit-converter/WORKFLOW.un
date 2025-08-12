@@ -1,0 +1,23 @@
+# Unit converter workflow
+
+1. Read purpose
+  - Parse `#` for app intent: convert Celsius to Fahrenheit.
+
+2. Initialize state (return { state: {}, priorReturn: null })
+
+3. For each function
+  a. Resolve inputs
+    - Use `context:` → priorReturn → state → inline `()`.
+  b. Execute
+    - Perform inline arithmetic; no external calls.
+  c. Validate
+    - Ensure `c` and `f` are finite numbers.
+  d. Return and update
+    - Return `{ c, f }`; merge into state; set priorReturn.
+  e. Log
+    - Marker, title, resolved inputs, result, timing, warnings.
+  f. TODO
+    - On `TODO`, stop with snapshot.
+
+4. Completion
+  - Emit final result and logs.

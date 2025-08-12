@@ -1,0 +1,10 @@
+# Wordcount spec
+
+1. Inputs (return { path })
+  - Path to a readable file.
+
+2. Output (return { lines, words, bytes, path })
+  - Use system `wc` semantics.
+
+3. Notes
+  - Treat binary files as bytes-only if needed; still return all fields.

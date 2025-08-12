@@ -1,0 +1,6 @@
+# SHA256 spec
+
+1. Inputs (return { path })
+2. Output (return { path, sha256 })
+3. Notes
+  - Deterministic; idempotent.

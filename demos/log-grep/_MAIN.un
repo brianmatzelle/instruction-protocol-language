@@ -1,0 +1,10 @@
+# Count 'ERROR' lines
+
+1. Inputs (return { path, pattern })
+  context:
+    path: "./app.log"
+    pattern: "ERROR"
+
+2. Grep (return { path, pattern, count })
+
+3. Result (return { hasErrors: (count > 0), count })

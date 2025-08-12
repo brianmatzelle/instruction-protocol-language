@@ -1,0 +1,11 @@
+# Log grep rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Execution policy
+  - Use `grep -c --fixed-strings -- "$pattern" "$path"` to count matches.
+  - On non-zero exit (file missing), halt with Resolution Needed.

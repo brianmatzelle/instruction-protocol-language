@@ -1,0 +1,6 @@
+# Convert CSV to JSON (first 5 rows)
+
+1. Read CSV (return { rows })
+  *{ limit: 5 }*
+
+2. Map headers (return { items, count: (items.length) })

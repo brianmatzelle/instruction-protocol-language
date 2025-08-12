@@ -1,0 +1,11 @@
+# Chained calc rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Execution policy
+  - For "Compute", call calculator backend: `python3 ../calculator/calc.py --op add --a 2 --b 3` unless overridden by context/state.
+  - Pipe result to step 3.

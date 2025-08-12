@@ -1,0 +1,6 @@
+# CSV to JSON spec
+
+1. Inputs (return { path, limit })
+2. Output (return { items, count })
+3. Notes
+  - Assumes first row contains headers.

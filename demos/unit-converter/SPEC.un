@@ -1,0 +1,10 @@
+# Unit converter spec
+
+1. Formula (return { f: ((c * 9/5) + 32) })
+  - Convert Celsius to Fahrenheit.
+
+2. Types (return { number: "float64" })
+  - Accept integers and floats; coerce to float64.
+
+3. Returns (return { c, f })
+  - Return both input and computed output.

@@ -1,0 +1,6 @@
+# URL probe spec
+
+1. Inputs (return { url, timeoutMs })
+2. Output (return { status, latencyMs, isHealthy })
+3. Transport
+  - Use HTTP HEAD; follow redirects by default.

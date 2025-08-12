@@ -1,0 +1,7 @@
+# Create slug from title
+
+1. Title (return { title })
+  context:
+    title: "My Cool Post!"
+
+2. Slug (return { title, slug: (lowercase(title).replace(" ", "-").replace("!", "")) })

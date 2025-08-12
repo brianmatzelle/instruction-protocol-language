@@ -1,0 +1,10 @@
+# TODO checkpoint rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. TODO behavior
+  - On `TODO`, emit snapshot with `purpose`, `marker`, `priorReturn`, `state`, `notes`, `app: "todo-checkpoint"` and halt.

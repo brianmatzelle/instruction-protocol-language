@@ -1,0 +1,6 @@
+# Log grep spec
+
+1. Inputs (return { path, pattern })
+2. Output (return { path, pattern, count })
+3. Behavior
+  - Fixed-string grep for determinism.

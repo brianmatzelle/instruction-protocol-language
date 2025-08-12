@@ -1,0 +1,6 @@
+# Slugify spec
+
+1. Inputs (return { title })
+2. Output (return { title, slug })
+3. Notes
+  - Lowercase and replace spaces with hyphens; remove punctuation.

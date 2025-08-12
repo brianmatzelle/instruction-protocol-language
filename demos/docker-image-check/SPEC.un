@@ -1,0 +1,5 @@
+# Docker image check spec
+
+1. Inputs (return { tag })
+2. Output (return { tag, exists, imageId })
+3. Partial (return { status: "partial", reason })

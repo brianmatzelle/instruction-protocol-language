@@ -1,0 +1,7 @@
+# Plan two-step action with checkpoint
+
+1. Prepare (return { planId: "alpha-1" })
+
+2. Validate prerequisites. TODO: confirm access keys before proceeding
+
+3. Execute (return { planId, status: "done" })

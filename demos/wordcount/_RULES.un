@@ -1,0 +1,17 @@
+# Wordcount rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Execution policy
+  - Use `wc -l -w -c <path>` to compute lines, words, and bytes.
+  - Parse CLI output into `{ lines, words, bytes }` integers.
+
+4. Errors
+  - If file missing, halt with Resolution Needed including `path`.
+
+5. Logging
+  - Log `path` and counts.

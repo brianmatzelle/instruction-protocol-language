@@ -1,0 +1,19 @@
+# Unit converter rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Inputs
+  - Accept `c` (Celsius) via `context:`, priorReturn, or state.
+
+4. Execution policy
+  - Prefer inline evaluation for arithmetic; no external calls required.
+
+5. Logging
+  - Log input `c` and computed `f`.
+
+6. TODO snapshot
+  - Include `purpose`, `marker`, `priorReturn`, `state`, `notes`, `app: "unit-converter"`.

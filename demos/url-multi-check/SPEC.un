@@ -1,0 +1,6 @@
+# URL multi-check spec
+
+1. Inputs (return { urls })
+2. Output (return { statuses, count })
+3. Notes
+  - Nested markers represent separate but related checks.

@@ -1,0 +1,8 @@
+# Check three URLs (no loops)
+
+1. Probe group
+  a. Probe A (return { urlA: "https://a.com", statusA })
+  b. Probe B (return { urlB: "https://b.com", statusB })
+  c. Probe C (return { urlC: "https://c.com", statusC })
+
+2. Aggregate (return { statuses: [statusA, statusB, statusC], count: 3 })

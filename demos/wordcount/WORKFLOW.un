@@ -1,0 +1,12 @@
+# Wordcount workflow
+
+1. Read purpose
+2. Initialize state (return { state: {}, priorReturn: null })
+3. For each function
+  a. Resolve inputs
+  b. Execute `wc` with non-interactive flags; capture stdout
+  c. Validate numbers
+  d. Return and update
+  e. Log
+  f. TODO
+4. Completion

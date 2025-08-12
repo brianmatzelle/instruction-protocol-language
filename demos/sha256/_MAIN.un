@@ -1,0 +1,9 @@
+# Compute SHA256
+
+1. File (return { path })
+  context:
+    path: "./calculator/calc.py"
+
+2. Hash (return { path, sha256 })
+
+3. Verify print (return { ok: (sha256 != null), path, sha256 })

@@ -1,0 +1,13 @@
+# JSON selector rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Execution policy
+  - Read JSON file at `path` and expose object as `data` in return.
+
+4. Errors
+  - If file missing or invalid JSON, halt with structured error.

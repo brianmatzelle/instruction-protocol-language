@@ -1,0 +1,7 @@
+# Chained calculation
+
+1. Seed (return { op: add, a: 2, b: 3 })
+
+2. Compute (return { result })
+
+3. Multiply by 10 (return { result: (result * 10) })

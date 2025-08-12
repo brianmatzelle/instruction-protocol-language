@@ -1,0 +1,13 @@
+# SHA256 rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Execution policy
+  - Use `sha256sum <path>`; parse first token as `sha256`.
+
+4. Errors
+  - If file missing, halt with Resolution Needed including `path`.

@@ -1,0 +1,11 @@
+# CSV to JSON rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Execution policy
+  - Read CSV from `path` (if provided) or stdin; respect `limit` from `*{ }*`.
+  - Convert rows to objects using header row.

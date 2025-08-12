@@ -1,0 +1,8 @@
+# TODO checkpoint workflow
+
+1. Read purpose
+2. Initialize state (return { state: {}, priorReturn: null })
+3. For each function
+  a. Execute and log
+  b. On `TODO`, stop and emit snapshot
+4. Completion

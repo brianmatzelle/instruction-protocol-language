@@ -1,0 +1,8 @@
+# Probe a URL
+
+1. Target (return { url })
+  context:
+    url: "https://example.com"
+
+2. HEAD request (return { url, status, latencyMs, isHealthy: (status >= 200 && status < 400) })
+  *{ timeoutMs: 3000 }*

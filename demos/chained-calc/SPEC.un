@@ -1,0 +1,5 @@
+# Chained calc spec
+
+1. Inputs (return { op, a, b })
+2. Step2 (return { result })
+3. Step3 (return { result })

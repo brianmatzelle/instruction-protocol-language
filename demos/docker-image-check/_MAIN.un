@@ -1,0 +1,8 @@
+# Check local docker image
+
+1. Image tag (return { tag })
+  context:
+    tag: "hello-world:latest"
+
+2. Inspect (return { tag, exists, imageId })
+  *{ if docker unavailable → return { status: "partial", reason: "NO_DOCKER" } }*

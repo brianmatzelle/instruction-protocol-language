@@ -1,0 +1,14 @@
+# URL probe rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Execution policy
+  - Use `curl -s -o /dev/null -w "%{http_code} %{time_total}" -I --max-time <timeout>` to probe.
+  - Map outputs to `{ status, latencyMs }` where `latencyMs = time_total * 1000`.
+
+4. Validation
+  - `isHealthy = (200 <= status < 400)`.

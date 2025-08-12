@@ -1,0 +1,8 @@
+# Count words in a file
+
+1. Target file (return { path })
+  context:
+    path: "./README.md"
+
+2. Run wc (return { path, lines, words, bytes })
+  *{ non-interactive; fail if file missing }*

@@ -1,0 +1,10 @@
+# URL multi-check rules (inherits from ../../undefined/_RULES.un)
+
+1. Inheritance
+  - Inherit all rules from `../../undefined/_RULES.un`.
+
+2. Entry point
+  - Entry file: `_MAIN.un` in this directory.
+
+3. Execution policy
+  - For each probe step, reuse url-probe `curl` HEAD logic; namespaced outputs `statusA`/`statusB`/`statusC`.
